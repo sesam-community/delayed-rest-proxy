@@ -2,7 +2,7 @@
 
 
 # delayed-rest-proxy
-Microservice for breaking down the rest-sink batch into single items and sending each with a delay in between
+Can be used to send rest requests with a delay between each request.
 
  ### Environment Parameters
 
@@ -18,10 +18,15 @@ Microservice for breaking down the rest-sink batch into single items and sending
 
  None for the microservice. Any query string that is sent to the microservice will be forwarded to the target system
 
+ ### How-to-configure
+   1. collect entities according to [Sesam's rest-entity-shape](https://docs.sesam.io/configuration.html#rest-expected-rest-entity-shape)
+   2. create the microservice system
+   3. create an endpoint pipe with sink of type json
 
 
- ### An example of system config:
+ ### Example configurations:
 
+ ##### system:
  ```json
  {
    "_id": "my-delayed-rest-system",
@@ -31,34 +36,74 @@ Microservice for breaking down the rest-sink batch into single items and sending
        "DELAY_DURATION_IN_SECONDS": "3",
        "LOG_LEVEL": "DEBUG",
        "OPERATIONS": {
-         "put-customer": {
+         "put-entity": {
            "headers": {
              "Content-type": "application/json; charset=utf-8"
            },
            "method": "PUT",
-           "url": "customer"
+           "url": "myendpoint"
          },
-         "post-customer": {
+         "post-entity": {
            "headers": {
              "Content-type": "application/json; charset=utf-8"
            },
            "method": "POST",
-           "url": "customer"
+           "url": "myendpoint"
          },
-         "delete-customer": {
+         "delete-entity": {
            "headers": {
              "Content-type": "application/json; charset=utf-8"
            },
            "method": "DELETE",
-           "url": "customer"
+           "url": "myendpoint"
          }
        },
-       "URL_PATTERN": "http://my-customer-system/%s"
+       "URL_PATTERN": "http://my-rest-receiver-system/%s"
      },
-     "image": "sesamcommunity/delayed-rest-proxy:9.9.9",
+     "image": "sesamcommunity/delayed-rest-proxy:1.0.0",
      "memory": 512,
      "port": 5000
    }
  }
+
+ ```
+
+##### entity to be prosessed
+```json
+{
+  "_id": "1",
+  "operation": "put-entity",
+  "payload": {
+    "key1": "value1",
+    "key2": "value2",
+    "key3": "value3",
+    "key4": "value4"
+  }
+}
+```
+
+ ##### pipe:
+ ```json
+ {
+  "_id": "my-endpoint",
+  "type": "pipe",
+  "source": {
+    "type": "dataset",
+    "dataset": "my-dataset"
+  },
+  "sink": {
+    "type": "json",
+    "system": "my-delayed-rest-system",
+    "url": ""
+  },
+  "transform": {
+    "type": "dtl",
+    "rules": {
+      "default": [
+        ["copy", "*"]
+      ]
+    }
+  }
+}
 
  ```
