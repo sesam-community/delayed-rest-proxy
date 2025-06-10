@@ -1,3 +1,4 @@
-Flask==1.1.1
-requests==2.21.0
+Flask==3.1.1
+requests==2.32.4
 sesamutils==0.1.10
+legacy-cgi

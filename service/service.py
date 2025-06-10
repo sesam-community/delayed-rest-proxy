@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.url_map.add(Rule('/', endpoint='proxy'))
 
 required_env_vars = ["OPERATIONS", "URL_PATTERN"]
-optional_env_vars = [("DELAY_DURATION_IN_SECONDS", 60), "LOG_LEVEL"]
+optional_env_vars = [("DELAY_DURATION_IN_SECONDS", 60), "LOG_LEVEL", "TOLERABLE_STATUS_CODES"]
 env_config = VariablesConfig(
     required_env_vars, optional_env_vars=optional_env_vars)
 
@@ -78,8 +78,11 @@ def proxy(path=""):
                 headers=operation.get("headers"),
                 params=request.args.items(),
                 json=payload)
-
-        return generate_response(200, "")
+        
+        if re.search(env_config.TOLERABLE_STATUS_CODES, str(r.status_code)):
+            return generate_response(200, f"(TOLERATED_STATUS_CODE {r.status_code}) - {r.text}")
+        else:
+            return generate_response(r.status_code, r.text)
 
     except Exception as e:
         logger.exception(e)

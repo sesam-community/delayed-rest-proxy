@@ -12,6 +12,7 @@ Can be used to send rest requests with a delay between each request.
  | URL_PATTERN |  same as 'url_pattern' in  in [Sesam's built-in REST system](https://docs.sesam.io/configuration.html#the-rest-system)  Azure Storage account key. | no, basic auth alternatively | n/a |
  | DELAY_DURATION_IN_SECONDS | number of seconds to wait between each rest request  | no | 60 |
  | LOG_LEVEL | log level. One of DEBUG,INFO,WARNING,ERROR,CRITICAL | no | INFO |
+ | TOLERABLE_STATUS_CODES | Regex expression. If HTTP status code returned from the target system is a match, then the errors will not be escalated.    | no | none |
 
 
  ### Query Parameters

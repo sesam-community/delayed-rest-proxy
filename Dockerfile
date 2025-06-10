@@ -1,5 +1,5 @@
-FROM python:3-alpine
-LABEL maintainer="Egemen Yavuz <melih.egemen.yavuz@sysco.no>"
+FROM python:3.10-alpine
+LABEL maintainer="Egemen Yavuz <melih.egemen.yavuz@elvia.no>"
 
 COPY ./service /service
 WORKDIR /service
