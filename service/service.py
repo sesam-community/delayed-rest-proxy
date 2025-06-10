@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.url_map.add(Rule('/', endpoint='proxy'))
 
 required_env_vars = ["OPERATIONS", "URL_PATTERN"]
-optional_env_vars = [("DELAY_DURATION_IN_SECONDS", 60), "LOG_LEVEL"]
+optional_env_vars = [("DELAY_DURATION_IN_SECONDS", 60), "LOG_LEVEL", ("DO_SWALLOW_ERRORS","false")]
 env_config = VariablesConfig(
     required_env_vars, optional_env_vars=optional_env_vars)
 
@@ -23,6 +23,7 @@ if not env_config.validate():
 
 env_config.OPERATIONS = json.loads(env_config.OPERATIONS)
 env_config.DELAY_DURATION_IN_SECONDS = int(env_config.DELAY_DURATION_IN_SECONDS)
+env_config.DO_SWALLOW_ERRORS = True if str(env_config.DO_SWALLOW_ERRORS).lower() in ["1","true"] else False
 
 logger = sesam_logger("delayed-rest-proxy", app=app)
 logger.info(
@@ -78,8 +79,10 @@ def proxy(path=""):
                 headers=operation.get("headers"),
                 params=request.args.items(),
                 json=payload)
-
-        return generate_response(200, "")
+        if env_config.DO_SWALLOW_ERRORS or r.ok:
+            return generate_response(200, r.text)
+        else:
+            return generate_response(r.status_code, r.text)
 
     except Exception as e:
         logger.exception(e)
